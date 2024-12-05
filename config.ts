@@ -1,13 +1,5 @@
 /**
- * 合并方式
- */
-export enum MergeType {
-    TEXT,
-    BIN,
-}
-
-/**
- * 基础配置
+ * 配置
  */
 export const CFG = {
     /** 输入：表格目录 */
@@ -23,5 +15,5 @@ export const CFG = {
     /** 合并目录 */
     MINIFIED: "minified",
     /** 合并名称 */
-    MERGE_AS: "excel-dumper"
+    MERGE_AS: "table.min"
 } as const;
