@@ -1,15 +1,15 @@
 # ccc-xlsx-dump
 
-To install dependencies:
+## 安装
 
 ```bash
 bun install
 ```
 
-To run:
+## 使用
 
-```bash
-bun run index.ts
-```
+- `bun run index.ts -d/--dump`              导出表格配置
+- `bun run index.ts -e/--extract <bin>`     解析BIN文件
+- `bun run index.ts -m/--merge`             合并所有输出
+- `bun run index.ts -h/--help`              查看帮助
 
-This project was created using `bun init` in bun v1.1.34. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
