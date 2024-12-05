@@ -53,7 +53,7 @@ bun install
 
 > 开发者可以很方便地添加自定义解析规则，只需要遵循基础的规则约定并实现 `IRule` 接口，最后通过 `Ruler.register` 进行注册即可。
 
-> 规则约定：`规则标识[=规则参数]`，例如：`P=未知,男,女`，`P` 是规则标识，`未知,男,女` 是规则参数；其中 `规则标识` 是必填项，`规则参数` 是可选的，主要看需求。
+> 规则约定：`规则标识[=规则参数[#规则备注]]`，例如：`P=未知,男,女#性别选择器`，`P` 是规则标识，`未知,男,女` 是规则参数，`#性别选择器` 是规则备注；其中 `规则标识` 是必填项，`规则参数` 和 `规则备注` 是可选的，主要看需求。
 
 > 例如，我想要自定义一个**固定长度的数值数组**，可以按照如下方式实现：
 
@@ -93,9 +93,36 @@ console.log(parsed); // [1.01, 2.02, 3.03, 4.04, 5.05]
 console.log(transformed); // {0: number, length: 5}
 ```
 
-## 使用
+## 命令
 
 -   `bun run index.ts -d/--dump` 导出表格配置
 -   `bun run index.ts -e/--extract <bin>` 解析 BIN 文件
 -   `bun run index.ts -m/--merge` 合并所有输出
 -   `bun run index.ts -h/--help` 查看帮助
+
+## 约定
+
+### 表头
+
+第一至三行为表头，其中：
+
+-   第一行：字段释义
+-   第二行：字段名称
+-   第三行：字段规则
+
+![表头](screenshot/sheet-header.png)
+
+### 表格名称
+
+`表格名称#备注` 其中只有表格名称会被当做文件名，备注会被忽略。
+
+![表名](screenshot/sheet-name.png)
+
+### 导出示例
+
+-   json 导出示例</br>
+![json导出示例](screenshot/dump-json.png)
+-   dts 导出示例</br>
+    ![.d.ts导出示例](screenshot/dump-dts.png)
+-   ts 导出示例</br>
+    ![ts导出示例](screenshot/dump-ts.png)
