@@ -118,11 +118,27 @@ console.log(transformed); // {0: number, length: 5}
 
 ![表名](screenshot/sheet-name.png)
 
+## 示例
+
 ### 导出示例
 
 -   json 导出示例</br>
-![json导出示例](screenshot/dump-json.png)
+    ![json导出示例](screenshot/dump-json.png)
 -   dts 导出示例</br>
     ![.d.ts导出示例](screenshot/dump-dts.png)
 -   ts 导出示例</br>
     ![ts导出示例](screenshot/dump-ts.png)
+
+### 合并后文件大小对比
+
+> 本次测试：角色表包含 2000 条数据。
+
+![合并后文件大小对比](screenshot/merge-file-size.png)
+
+其中：
+
+-   TS 文件最大，因为它包含了类型声明；
+-   JSON 文件次之，但和 TS 的差距不明显，因为它不包含类型声明，且表格的样本较小；
+-   BIN 文件最小，因为它使用了文本压缩算法对 JSON 数据进行了二次压缩（最终大小仅为 JSON 的 7%）。
+
+开发者可以根据需要选择合适的格式。或者使用自定义的压缩算法，本项目中使用的是 zlib 压缩算法（由 [zipson](https://github.com/jgranstrom/zipson)、[pako](https://github.com/nodeca/pako) 组合实现），开发者也可以使用其他压缩算法，例如：gzip、brotli、lz4 等。

@@ -85,8 +85,11 @@ function mergeAllDTS() {
     const all = [];
     const dirPath = path.join(__dirname, "types");
     const files = fs.readdirSync(dirPath);
+    const tables = ["    type Tables = {"];
     for (const file of files) {
         if (file.endsWith(".d.ts")) {
+            const name = path.basename(file, ".d.ts");
+            tables.push("        " + name + ": ITbl" + Capitalize(name) + ";");
             let dts = fs.readFileSync(path.join(dirPath, file), "utf-8");
             dts = dts
                 .split("\n")
@@ -95,6 +98,8 @@ function mergeAllDTS() {
             all.push(dts);
         }
     }
+    tables.push("    }");
+    all.push(tables.join("\n"));
     const MINIFIED_AT = path.join(__dirname, CFG.MINIFIED);
     const TS_AT = path.join(MINIFIED_AT, CFG.MERGE_AS + ".d.ts");
     if (!fs.existsSync(MINIFIED_AT)) {

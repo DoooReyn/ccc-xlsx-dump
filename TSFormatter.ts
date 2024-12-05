@@ -20,7 +20,7 @@ export function TSify(table: string, headers: [string[], string[], boolean[]], d
     }
     interfaces.push("}");
     const types = interfaces.join("\n");
-    const tables = "export const Tbl" + ctable + ": Record<string, ITbl" + ctable + "> = " + JSONify(data, 4) + " as const;";
+    const tables = "export const Tbl" + ctable + ": Record<string, ITbl" + ctable + "> = " + JSONify(data, 0) + " as const;";
     const content = ["export " + types, tables].join("\n\n");
     return [content, types];
 }

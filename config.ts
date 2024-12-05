@@ -15,5 +15,5 @@ export const CFG = {
     /** 合并目录 */
     MINIFIED: "minified",
     /** 合并名称 */
-    MERGE_AS: "table.min"
+    MERGE_AS: "table"
 } as const;
