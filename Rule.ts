@@ -1,11 +1,18 @@
-type IRule<RET> = (text: string, params?: string) => RET;
-type IRuleType = (key: string, params: string) => string;
+/** 规则接口（所有规则都必须实现此接口） */
+export interface IRule<RET> {
+    /** 规则标识 */
+    identifier: string;
+    /** 规则解析器 */
+    parser: (text: string, params?: string) => RET;
+    /** 规则类型转换器 */
+    transformer: (rule: string, params?: string) => string;
+}
 
 /**
  * 布尔解析器
  * @param text 文本
- * @example 0
- * @example 1
+ * @example 0 => false
+ * @example 1 => true
  * @returns
  */
 function BooleanParser(text: string): boolean {
@@ -78,7 +85,7 @@ function PickParser(text: string, params?: string): number {
  */
 function ListParser(text: string, params?: string): any[] {
     const pk = params!.split("#")[0];
-    return text.split(",").map((v) => RuleParser.parse(pk, v));
+    return text.split(",").map((v) => Ruler.parse(pk, v));
 }
 
 /**
@@ -124,7 +131,7 @@ function ListStringParser(text: string): string[] {
  */
 function ListItemParser(text: string, params?: string): any[] {
     const ps = params!.split("#")[0].split(",");
-    return text.split(",").map((v, i) => RuleParser.parse(ps[i], v));
+    return text.split(",").map((v, i) => Ruler.parse(ps[i], v));
 }
 
 /**
@@ -138,8 +145,8 @@ function MapParser(text: string, params?: string): Record<string, any> {
     const pk = params!.split("#")[0];
     text.split(";").forEach((sub) => {
         const [k, v] = sub.split(",");
-        const key = RuleParser.parse("S", k);
-        const val = RuleParser.parse(pk, v);
+        const key = Ruler.parse("S", k);
+        const val = Ruler.parse(pk, v);
         ret[key] = val;
     });
     return ret;
@@ -193,7 +200,7 @@ function MapAllParser(text: string, params?: string): Record<string, any> {
     const ps = pks[0];
     text.split(",").forEach((sub, i) => {
         const key = pks[i + 1];
-        const val = RuleParser.parse(ps, sub);
+        const val = Ruler.parse(ps, sub);
         ret[key] = val;
     });
     return ret;
@@ -210,7 +217,7 @@ function MapItemParser(text: string, params?: string): Record<string, any> {
     const ret: Record<string, any> = {};
     text.split(",").forEach((sub, i) => {
         const [pk, pv] = ps[i].split(",");
-        const val = RuleParser.parse(pv, sub);
+        const val = Ruler.parse(pv, sub);
         ret[pk] = val;
     });
     return ret;
@@ -316,38 +323,49 @@ function BasicTypeTransformer(identifier: string, params?: string) {
 /**
  * 规则解析器
  */
-export class RuleParser {
-    private static _rules: Map<string, [IRule<any>, IRuleType]> = new Map();
+export class Ruler {
+    private static _rules: Map<string, IRule<any>> = new Map();
 
     public static initialize() {
-        this.register<boolean>("B", [BooleanParser, BasicTypeTransformer]);
-        this.register<number>("I", [IntegerParser, BasicTypeTransformer]);
-        this.register<number>("N", [NumberParser, BasicTypeTransformer]);
-        this.register<string>("S", [StringParser, BasicTypeTransformer]);
-        this.register<number>("P", [PickParser, BasicTypeTransformer]);
-        this.register<boolean[]>("LB", [ListBooleanParser, BasicTypeTransformer]);
-        this.register<number[]>("LI", [ListIntegerParser, BasicTypeTransformer]);
-        this.register<number[]>("LN", [ListNumberParser, BasicTypeTransformer]);
-        this.register<string[]>("LS", [ListStringParser, BasicTypeTransformer]);
-        this.register<Record<string, boolean>>("MB", [MapBooleanParser, BasicTypeTransformer]);
-        this.register<Record<string, number>>("MI", [MapIntegerParser, BasicTypeTransformer]);
-        this.register<Record<string, number>>("MN", [MapNumberParser, BasicTypeTransformer]);
-        this.register<Record<string, string>>("MS", [MapStringParser, BasicTypeTransformer]);
-        // 高级内容
-        this.register<any[]>("L", [ListParser, BasicTypeTransformer]);
-        this.register<any[]>("LE", [ListItemParser, BasicTypeTransformer]);
-        this.register<Record<string, any>>("M", [MapParser, BasicTypeTransformer]);
-        this.register<Record<string, any>>("MA", [MapAllParser, BasicTypeTransformer]);
-        this.register<Record<string, any>>("ME", [MapItemParser, BasicTypeTransformer]);
+        this.register<boolean>({ identifier: "B", parser: BooleanParser, transformer: BasicTypeTransformer });
+        this.register<number>({ identifier: "I", parser: IntegerParser, transformer: BasicTypeTransformer });
+        this.register<number>({ identifier: "N", parser: NumberParser, transformer: BasicTypeTransformer });
+        this.register<string>({ identifier: "S", parser: StringParser, transformer: BasicTypeTransformer });
+        this.register<number>({ identifier: "P", parser: PickParser, transformer: BasicTypeTransformer });
+        this.register<any[]>({ identifier: "L", parser: ListParser, transformer: BasicTypeTransformer });
+        this.register<any[]>({ identifier: "LE", parser: ListItemParser, transformer: BasicTypeTransformer });
+        this.register<boolean[]>({ identifier: "LB", parser: ListBooleanParser, transformer: BasicTypeTransformer });
+        this.register<number[]>({ identifier: "LI", parser: ListIntegerParser, transformer: BasicTypeTransformer });
+        this.register<number[]>({ identifier: "LN", parser: ListNumberParser, transformer: BasicTypeTransformer });
+        this.register<string[]>({ identifier: "LS", parser: ListStringParser, transformer: BasicTypeTransformer });
+        this.register<Record<string, any>>({ identifier: "M", parser: MapParser, transformer: BasicTypeTransformer });
+        this.register<Record<string, boolean>>({
+            identifier: "MB",
+            parser: MapBooleanParser,
+            transformer: BasicTypeTransformer,
+        });
+        this.register<Record<string, number>>({
+            identifier: "MI",
+            parser: MapIntegerParser,
+            transformer: BasicTypeTransformer,
+        });
+        this.register<Record<string, number>>({ identifier: "MN", parser: MapNumberParser, transformer: BasicTypeTransformer });
+        this.register<Record<string, string>>({ identifier: "MS", parser: MapStringParser, transformer: BasicTypeTransformer });
+        this.register<Record<string, any>>({ identifier: "MA", parser: MapAllParser, transformer: BasicTypeTransformer });
+        this.register<Record<string, any>>({ identifier: "ME", parser: MapItemParser, transformer: BasicTypeTransformer });
     }
 
     /**
      * 注册规则
-     * @param identifier 规则标识
-     * @param parser 规则解析器
+     * @param rule 规则
+     * @param replace 是否替换原规则（默认否）
      */
-    public static register<RET>(identifier: string, parser: [IRule<RET>, IRuleType]) {
-        this._rules.set(identifier, parser);
+    public static register<RET>(rule: IRule<RET>, replace: boolean = false) {
+        if (replace || !this._rules.has(rule.identifier)) {
+            this._rules.set(rule.identifier, rule);
+        } else {
+            throw new Error("规则已存在，如需替换，请将 replace 置为真：" + rule.identifier);
+        }
     }
 
     /**
@@ -357,10 +375,10 @@ export class RuleParser {
      * @returns
      */
     public static parse(rule: string, text: string) {
-        const [key, params] = rule.split("=");
-        const ruler = this._rules.get(key);
+        const [identifier, params] = rule.split("=");
+        const ruler = this._rules.get(identifier);
         if (ruler) {
-            return ruler[0](text, params);
+            return ruler.parser(text, params);
         } else {
             throw new Error("未注册的规则解析器：" + rule);
         }
@@ -372,10 +390,10 @@ export class RuleParser {
      * @returns
      */
     public static transform(rule: string) {
-        const [key, params] = rule.split("=");
-        const ruler = this._rules.get(key);
+        const [identifier, params] = rule.split("=");
+        const ruler = this._rules.get(identifier);
         if (ruler) {
-            return ruler[1](key, params);
+            return ruler.transformer(identifier, params);
         } else {
             throw new Error("未注册的规则转换器：" + rule);
         }

@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { CFG } from "./config";
 import { XLSXDumper } from "./XLSXDumper";
-import { RuleParser } from "./Rule";
+import { Ruler } from "./Rule";
 import { Capitalize, Exit } from "./cmm";
 import { RSON } from "./rson";
 
@@ -10,7 +10,9 @@ import { RSON } from "./rson";
  * 导出配置
  */
 function dump() {
-    RuleParser.initialize();
+    Ruler.initialize();
+    console.log(Ruler.parse("M=B", "a,1;b,2"));
+    console.log(Ruler.transform("M=B"));
     const dirPath = path.join(__dirname, CFG.TABLE);
     const files = fs.readdirSync(dirPath);
     for (const file of files) {

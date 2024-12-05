@@ -1,7 +1,7 @@
 import xlsx from "node-xlsx";
 import fs from "fs";
 import path from "path";
-import { RuleParser } from "./Rule";
+import { Ruler } from "./Rule";
 import { CFG } from "./config";
 import { JSONify } from "./JSONFormatter";
 import { TSify } from "./TSFormatter";
@@ -81,7 +81,7 @@ function parseSheet(sheet: { name: string; data: any[] }) {
         let primary: string | number | undefined = undefined;
         for (let i = 0; i < row.length; i++) {
             if (!passable[i]) {
-                item[header2[i]] = RuleParser.parse(header3[i], row[i]);
+                item[header2[i]] = Ruler.parse(header3[i], row[i]);
                 if (primary == undefined) {
                     primary = item[header2[i]];
                 }

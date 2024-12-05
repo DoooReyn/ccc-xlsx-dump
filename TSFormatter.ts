@@ -1,6 +1,6 @@
 import { Capitalize } from "./cmm";
 import { JSONify } from "./JSONFormatter";
-import { RuleParser } from "./Rule";
+import { Ruler } from "./Rule";
 
 /**
  * 转换为TS代码
@@ -15,7 +15,7 @@ export function TSify(table: string, headers: [string[], string[], boolean[]], d
     const interfaces = ["interface ITbl" + ctable + " {"];
     for (let i = 0; i < passable.length; i++) {
         if (passable[i]) continue;
-        const type = RuleParser.transform(header3[i]);
+        const type = Ruler.transform(header3[i]);
         interfaces.push(`    ${header2[i]}: ${type};`);
     }
     interfaces.push("}");
