@@ -101,7 +101,7 @@ function mergeAllDTS() {
     const MINIFIED_AT = path.join(__dirname, CFG.MINIFIED);
     const TS_AT = path.join(MINIFIED_AT, CFG.MERGE_AS + ".d.ts");
     if (!fs.existsSync(MINIFIED_AT)) {
-        fs.mkdirSync(path.dirname(MINIFIED_AT));
+        fs.mkdirSync(MINIFIED_AT);
     }
     const name = Capitalize(CFG.MERGE_AS);
     const dts = all.join("\n\n");
