@@ -65,6 +65,7 @@ export function XLSXDumper(filePath: string) {
  * @param sheet 表格信息
  */
 function parseSheet(sheet: { name: string; data: any[] }) {
+    if (sheet.name.startsWith("#")) return;
     let data: Record<number | string, any> = {};
     let valid = false;
     let table = sheet.name.split("#")[0];
