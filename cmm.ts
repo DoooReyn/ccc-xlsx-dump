@@ -19,3 +19,15 @@ export function Exit(code: number, msg?: string) {
     }
     process.exit(code);
 }
+
+
+/**
+ * 补齐宽度
+ * @param str 字符串
+ * @param len 预定宽度
+ * @returns 
+ */
+export function ExtraSpace(str: string, len: number = 20) {
+    len = Math.max(0, len - str.length);
+    return len == 0 ? str : str + " ".repeat(len);
+}

@@ -26,6 +26,9 @@ function BooleanParser(text: string): boolean {
  * @returns
  */
 function IntegerParser(text: string): number {
+    if (typeof text === "string") {
+        text = text.replace(/\D/g, ""); // 去除所有非数字的字符
+    }
     let ret = parseInt(text);
     if (isNaN(ret)) {
         throw new Error("[I] Not a number");
@@ -40,6 +43,9 @@ function IntegerParser(text: string): number {
  * @returns
  */
 function NumberParser(text: string): number {
+    if (typeof text === "string") {
+        text = text.replace(/[^\d.]/g, ""); // 去除所有非数字和非小数点的字符
+    }
     let ret = parseFloat(text);
     if (isNaN(ret)) {
         throw new Error("[N] Not a number");

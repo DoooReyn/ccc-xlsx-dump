@@ -11,8 +11,6 @@ import { RSON } from "./rson";
  */
 function dump() {
     Ruler.initialize();
-    console.log(Ruler.parse("M=B", "a,1;b,2"));
-    console.log(Ruler.transform("M=B"));
     const dirPath = path.join(__dirname, CFG.TABLE);
     const files = fs.readdirSync(dirPath);
     for (const file of files) {
@@ -132,6 +130,23 @@ function extractBin(bin: string) {
 }
 
 /**
+ * 清理所有文件
+ */
+function clear() {
+    const MINIFIED_AT = path.join(__dirname, CFG.MINIFIED);
+    const JSON_AT = path.join(__dirname, CFG.JSON);
+    const BIN_AT = path.join(__dirname, CFG.BIN);
+    const TS_AT = path.join(__dirname, CFG.TS);
+    const DTS_AT = path.join(__dirname, "types");
+    [MINIFIED_AT, JSON_AT, BIN_AT, TS_AT, DTS_AT].forEach((path) => {
+        if (fs.existsSync(path)) {
+            fs.rmSync(path, { recursive: true });
+            fs.mkdirSync(path);
+        }
+    });
+}
+
+/**
  * 主程序
  */
 const exe = process.argv[2];
@@ -149,9 +164,14 @@ switch (exe) {
     case "--dump":
         dump();
         break;
+    case "-c":
+    case "--clear":
+        clear();
+        break;
     case "-h":
     case "--help":
     default:
+        console.log("-c/--clear             清理所有文件");
         console.log("-d/--dump              导出表格配置");
         console.log("-e/--extract <bin>     解析BIN文件");
         console.log("-m/--merge             合并所有输出");

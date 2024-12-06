@@ -6,11 +6,7 @@ import { CFG } from "./config";
 import { JSONify } from "./JSONFormatter";
 import { TSify } from "./TSFormatter";
 import { BINify } from "./BinFormatter";
-import { Exit } from "./cmm";
-
-function ExtraSpace(str: string, len: number = 20) {
-    return str + " ".repeat(len - str.length);
-}
+import { ExtraSpace } from "./cmm";
 
 /**
  * 合并表头
@@ -51,13 +47,11 @@ function Passable(header: string[]) {
  */
 export function XLSXDumper(filePath: string) {
     console.log("准备解析配置：" + filePath);
-    fs.readFile(filePath, (err, data) => {
-        if (err) return Exit(-1, err.toString());
-        const sheets = xlsx.parse(data);
-        for (let i = 0; i < sheets.length; i++) {
-            parseSheet(sheets[i]);
-        }
-    });
+    const data = fs.readFileSync(filePath);
+    const sheets = xlsx.parse(data);
+    for (let i = 0; i < sheets.length; i++) {
+        parseSheet(sheets[i]);
+    }
 }
 
 /**
@@ -66,6 +60,18 @@ export function XLSXDumper(filePath: string) {
  */
 function parseSheet(sheet: { name: string; data: any[] }) {
     if (sheet.name.startsWith("#")) return;
+    if (sheet.name.startsWith("@")) {
+        parseVSheet(sheet); // 竖向表格
+    } else {
+        parseHSheet(sheet); // 横向表格
+    }
+}
+
+/**
+ * 解析横向表格
+ * @param sheet 表格信息
+ */
+function parseHSheet(sheet: { name: string; data: any[] }) {
     let data: Record<number | string, any> = {};
     let valid = false;
     let table = sheet.name.split("#")[0];
@@ -73,7 +79,7 @@ function parseSheet(sheet: { name: string; data: any[] }) {
     let header2 = sheet.data[1];
     let header3 = sheet.data[2];
     let passable = Passable(header2);
-    console.log("  正在解析表格：" + table);
+    console.log("  正在解析横向表格：" + table);
     console.log("    字段：\n" + ZipHeaders(header1, header2, header3));
     for (let l = 3; l < sheet.data.length; l++) {
         let row = sheet.data[l];
@@ -94,26 +100,69 @@ function parseSheet(sheet: { name: string; data: any[] }) {
         }
     }
     if (valid) {
-        const targets = CFG.TARGETS.split(",");
-        for (let i = 0; i < targets.length; i++) {
-            const target = targets[i];
-            // @ts-ignore
-            const dirname = CFG[target];
-            switch (target) {
-                case "JSON":
-                    Save(dirname, ".json", table, JSONify(data));
-                    break;
-                case "TS":
-                    {
-                        const [ts, dts] = TSify(table, [header2, header3, passable], data);
-                        Save(dirname, ".ts", table, ts);
-                        Save("types", ".d.ts", table, dts);
-                    }
-                    break;
-                case "BIN":
-                    Save(dirname, ".bin", table, BINify(data));
-                    break;
-            }
+        SaveSheet(table, header2, header3, passable, data);
+    }
+}
+
+/**
+ * 解析横向表格
+ * @param sheet 表格信息
+ */
+function parseVSheet(sheet: { name: string; data: any[] }) {
+    let data: Record<string, any> = {};
+    let table = sheet.name.split("#")[0].replace("@", "");
+    console.log("  正在解析竖向表格：" + table);
+    const count = sheet.data.length;
+    if (count == 0) return console.warn("表格为空");
+    const width = sheet.data[0].length;
+    if (width == 4) {
+        const header1 = [];
+        const header2 = [];
+        const header3 = [];
+        const passable = [];
+        for (let i = 0; i < count; i++) {
+            let [key, name, identifier, value] = sheet.data[i];
+            passable[i] = false;
+            header1.push(key);
+            header2.push(name);
+            header3.push(identifier);
+            data[name] = Ruler.parse(identifier, value);
+        }
+        console.log("    字段：\n" + ZipHeaders(header1, header2, header3));
+        SaveSheet(table, header2, header3, passable, data);
+    } else {
+        console.warn("竖向表格格式错误");
+    }
+}
+
+/**
+ * 保存表格
+ * @param table 表名
+ * @param header2 表头2
+ * @param header3 表头3
+ * @param passable 跳过字段
+ * @param data 数据
+ */
+function SaveSheet(table: string, header2: string[], header3: string[], passable: boolean[], data: Record<string, any>) {
+    const targets = CFG.TARGETS.split(",");
+    for (let i = 0; i < targets.length; i++) {
+        const target = targets[i];
+        // @ts-ignore
+        const dirname = CFG[target];
+        switch (target) {
+            case "JSON":
+                Save(dirname, ".json", table, JSONify(data));
+                break;
+            case "TS":
+                {
+                    const [ts, dts] = TSify(table, [header2, header3, passable], data);
+                    Save(dirname, ".ts", table, ts);
+                    Save("types", ".d.ts", table, dts);
+                }
+                break;
+            case "BIN":
+                Save(dirname, ".bin", table, BINify(data));
+                break;
         }
     }
 }
