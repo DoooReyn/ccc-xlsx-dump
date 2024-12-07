@@ -15,8 +15,8 @@ export interface IRule<RET> {
  * @example 1 => true
  * @returns
  */
-function BooleanParser(text: string): boolean {
-    return text === "1";
+function BooleanParser(text: string | number): boolean {
+    return [1, "1", "T", "true", "TRUE"].includes(text);
 }
 
 /**
@@ -26,6 +26,7 @@ function BooleanParser(text: string): boolean {
  * @returns
  */
 function IntegerParser(text: string): number {
+    text ??= "0";
     if (typeof text === "string") {
         text = text.replace(/\D/g, ""); // 去除所有非数字的字符
     }
@@ -43,6 +44,7 @@ function IntegerParser(text: string): number {
  * @returns
  */
 function NumberParser(text: string): number {
+    text ??= "0";
     if (typeof text === "string") {
         text = text.replace(/[^\d.]/g, ""); // 去除所有非数字和非小数点的字符
     }
@@ -60,7 +62,7 @@ function NumberParser(text: string): number {
  * @returns
  */
 function StringParser(text: string): string {
-    return text;
+    return text ?? "";
 }
 
 /**
@@ -76,6 +78,9 @@ function PickParser(text: string, params?: string): number {
     params!.split(",").forEach((v, i) => {
         values[v] = i;
     });
+    if (text == undefined) {
+        throw new Error("[OP] Not a valid option");
+    }
     let ret = values[text];
     if (ret === undefined) {
         throw new Error("[OP] Not a valid option");

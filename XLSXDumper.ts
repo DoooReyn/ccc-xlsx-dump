@@ -79,6 +79,7 @@ function parseHSheet(sheet: { name: string; data: any[] }) {
     let header2 = sheet.data[1];
     let header3 = sheet.data[2];
     let passable = Passable(header2);
+    let rowLen = passable.length;
     console.log("  正在解析横向表格：" + table);
     console.log("    字段：\n" + ZipHeaders(header1, header2, header3));
     for (let l = 3; l < sheet.data.length; l++) {
@@ -86,7 +87,7 @@ function parseHSheet(sheet: { name: string; data: any[] }) {
         if (row.length == 0) continue;
         let item: Record<string, any> = {};
         let primary: string | number | undefined = undefined;
-        for (let i = 0; i < row.length; i++) {
+        for (let i = 0; i < rowLen; i++) {
             if (!passable[i]) {
                 item[header2[i]] = Ruler.parse(header3[i], row[i]);
                 if (primary == undefined) {
@@ -105,7 +106,7 @@ function parseHSheet(sheet: { name: string; data: any[] }) {
 }
 
 /**
- * 解析横向表格
+ * 解析竖向表格
  * @param sheet 表格信息
  */
 function parseVSheet(sheet: { name: string; data: any[] }) {
