@@ -30,9 +30,12 @@ function IntegerParser(text: string): number {
     if (typeof text === "string") {
         text = text.replace(/\D/g, ""); // 去除所有非数字的字符
     }
+    if (text.length == 0) {
+        text = "0";
+    }
     let ret = parseInt(text);
     if (isNaN(ret)) {
-        throw new Error("[I] Not a number");
+        throw new Error(`[I] "${text}" Not a number`);
     }
     return ret;
 }
@@ -48,9 +51,12 @@ function NumberParser(text: string): number {
     if (typeof text === "string") {
         text = text.replace(/[^\d.]/g, ""); // 去除所有非数字和非小数点的字符
     }
+    if (text.length == 0) {
+        text = "0";
+    }
     let ret = parseFloat(text);
     if (isNaN(ret)) {
-        throw new Error("[N] Not a number");
+        throw new Error(`[I] "${text}" Not a number`);
     }
     return ret;
 }
@@ -79,11 +85,11 @@ function PickParser(text: string, params?: string): number {
         values[v] = i;
     });
     if (text == undefined) {
-        throw new Error("[OP] Not a valid option");
+        throw new Error(`[OP] "${text}" Not a valid option`);
     }
     let ret = values[text];
     if (ret === undefined) {
-        throw new Error("[OP] Not a valid option");
+        throw new Error(`[OP] "${text}" Not a valid option`);
     }
     return ret;
 }
